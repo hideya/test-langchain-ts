@@ -2,19 +2,33 @@ import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { LLMConfig, ConfigurationError } from '../types/config';
+import { ChatContext, ChatContextConfig } from '../types/chat';
 
 export class LLMService {
   private models: Map<string, BaseChatModel> = new Map();
+  private contexts: Map<string, ChatContext> = new Map();
   private currentModel: string;
 
-  private constructor(defaultLLM: string) {
+  private constructor(defaultLLM: string, contextConfig?: ChatContextConfig) {
     this.currentModel = defaultLLM;
+    this.initializeContexts(contextConfig);
   }
 
-  static async initialize(llmConfigs: { [key: string]: LLMConfig }, defaultLLM: string): Promise<LLMService> {
-    const service = new LLMService(defaultLLM);
+  static async initialize(
+    llmConfigs: { [key: string]: LLMConfig }, 
+    defaultLLM: string,
+    contextConfig?: ChatContextConfig
+  ): Promise<LLMService> {
+    const service = new LLMService(defaultLLM, contextConfig);
     await service.initializeModels(llmConfigs);
     return service;
+  }
+
+  private initializeContexts(config?: ChatContextConfig): void {
+    this.contexts.clear();
+    if (config?.systemPrompt) {
+      console.log('Initializing chat contexts with system prompt:', config.systemPrompt);
+    }
   }
 
   private async initializeModel(config: LLMConfig): Promise<BaseChatModel> {
@@ -54,6 +68,7 @@ export class LLMService {
     const initPromises = Object.entries(configs).map(async ([name, config]) => {
       const model = await this.initializeModel(config);
       this.models.set(name, model);
+      this.contexts.set(name, new ChatContext());
     });
 
     await Promise.all(initPromises);
@@ -67,6 +82,14 @@ export class LLMService {
     return model;
   }
 
+  public getCurrentContext(): ChatContext {
+    const context = this.contexts.get(this.currentModel);
+    if (!context) {
+      throw new ConfigurationError(`Context for model ${this.currentModel} not initialized`);
+    }
+    return context;
+  }
+
   public switchModel(modelName: string): void {
     if (!this.models.has(modelName)) {
       throw new ConfigurationError(`Model ${modelName} not found in available configurations`);
@@ -77,5 +100,11 @@ export class LLMService {
 
   public listAvailableModels(): string[] {
     return Array.from(this.models.keys());
+  }
+
+  public clearCurrentContext(): void {
+    const context = this.getCurrentContext();
+    context.clear();
+    console.log(`Cleared chat context for model: ${this.currentModel}`);
   }
 }

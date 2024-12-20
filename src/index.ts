@@ -1,6 +1,5 @@
 import { readFile } from 'fs/promises';
 import { createInterface } from 'readline';
-import { HumanMessage } from '@langchain/core/messages';
 import { validateConfig } from './utils/config-validator';
 import { LLMService } from './services/llm-service';
 import { ConfigurationError } from './types/config';
@@ -27,13 +26,17 @@ async function main() {
 
     // Initialize LLM service
     console.log('Initializing LLM service...');
-    const llmService = await LLMService.initialize(config.llms, config.default_llm);
+    const llmService = await LLMService.initialize(config.llms, config.default_llm, {
+      maxMessages: 10,
+      systemPrompt: "You are a helpful AI assistant. Respond concisely and clearly.",
+    });
     console.log('LLM service initialized successfully');
 
     console.log('\nWelcome to the CLI Chat! Available commands:');
     console.log('- Type your message and press Enter to chat');
     console.log('- Type "/switch <model-name>" to switch between available models');
     console.log('- Type "/list" to see available models');
+    console.log('- Type "/clear" to clear the current conversation context');
     console.log('- Type "quit" or "q" to exit');
     console.log('─'.repeat(50));
 
@@ -79,16 +82,31 @@ async function main() {
               console.log(`\nSwitched to model: ${args[0]}`);
               break;
 
+            case 'clear':
+              llmService.clearCurrentContext();
+              console.log('\nConversation context cleared');
+              break;
+
             default:
-              console.log('\nUnknown command. Available commands: /list, /switch <model-name>');
+              console.log('\nUnknown command. Available commands: /list, /switch <model-name>, /clear');
           }
         } else {
           console.log('\nProcessing...');
           const chatModel = llmService.getCurrentModel();
-          const response = await chatModel.generate([[new HumanMessage(trimmedInput)]]);
+          const context = llmService.getCurrentContext();
+
+          // Add user message to context
+          context.addMessage(trimmedInput, 'human');
+
+          // Generate response using the full conversation context
+          const response = await chatModel.generate([context.getMessages()]);
 
           if (response.generations[0]?.[0]?.text) {
-            console.log('\nAI:', response.generations[0][0].text.trim());
+            const aiResponse = response.generations[0][0].text.trim();
+            console.log('\nAI:', aiResponse);
+
+            // Add AI response to context
+            context.addMessage(aiResponse, 'ai');
           } else {
             console.log('\nAI: Sorry, I could not generate a response.');
           }
