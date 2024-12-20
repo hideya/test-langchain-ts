@@ -108,7 +108,9 @@ export class LLMService {
   }
 
   public listAvailableModels(): string[] {
-    return Array.from(this.models.keys());
+    return Array.from(this.models.keys()).map(model => 
+      model === this.currentModel ? `*${model}` : `-${model}`
+    );
   }
 
   public clearCurrentContext(): void {
