@@ -91,7 +91,13 @@ async function main() {
             case 'history':
               const history = llmService.getCurrentContext().getFormattedHistory();
               console.log('\nChat History:');
-              history.forEach((msg, i) => console.log(`${i + 1}. ${msg}`));
+              history.forEach((msg, i) => {
+                if (msg.startsWith('AI:')) {
+                  console.log(`${i + 1}. \x1b[34m${msg}\x1b[0m`);
+                } else {
+                  console.log(`${i + 1}. ${msg}`);
+                }
+              });
               break;
 
             default:
@@ -110,7 +116,7 @@ async function main() {
 
           if (response.generations[0]?.[0]?.text) {
             const aiResponse = response.generations[0][0].text.trim();
-            console.log('\nAI:', aiResponse);
+            console.log('\n\x1b[34mAI:\x1b[0m', aiResponse);
 
             // Add AI response to context
             context.addMessage(aiResponse, 'ai');
