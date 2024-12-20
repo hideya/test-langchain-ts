@@ -13,25 +13,20 @@ A command-line interface chat application that supports multiple LLM providers (
 
 ## Setup
 
-1. Create a `config.json` file with your API keys:
-```json
-{
-  "default_llm": "gpt3",
-  "llms": {
-    "gpt3": {
-      "model": "gpt-3.5-turbo",
-      "provider": "openai",
-      "temperature": 0.7,
-      "api_key": "your-openai-key",
-      "systemPrompt": "You are a helpful AI assistant powered by GPT-3.5."
-    }
-  }
-}
+1. Install dependencies:
+```bash
+npm install
 ```
 
-2. Run the application:
+2. Configure the application:
+- Copy `llm-config-example.json` to `llm-config.json`
+- Update the API key and other settings in `llm-config.json`
+
+## Usage
+
+Run the application:
 ```bash
-npx ts-node src/index.ts config.json
+npm start
 ```
 
 ## Commands

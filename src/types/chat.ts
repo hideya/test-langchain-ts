@@ -34,7 +34,7 @@ export class ChatContext {
     }
 
     this.messages.push(message);
-    console.log(`Added ${type} message. Total messages: ${this.messages.length}`);
+    // console.log(`Added ${type} message. Total messages: ${this.messages.length}`);
 
     // Keep only the last maxMessages (excluding system message)
     const systemMessages = this.messages.filter(m => m instanceof SystemMessage);
@@ -47,7 +47,7 @@ export class ChatContext {
     }
 
     this.messages = [...systemMessages, ...nonSystemMessages];
-    console.log(`Final message count after trim: ${this.messages.length}`);
+    // console.log(`Final message count after trim: ${this.messages.length}`);
   }
 
   public getMessages(): BaseMessage[] {

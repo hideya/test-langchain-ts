@@ -100,7 +100,7 @@ export class LLMService {
     if (!this.models.has(modelName)) {
       throw new ConfigurationError(`Model ${modelName} not found in available configurations`);
     }
-    console.log(`Switching from ${this.currentModel} to ${modelName}`);
+    console.log(`\nSwitching from ${this.currentModel} to ${modelName}`);
     console.log(`Current context messages count: ${this.getCurrentContext().getMessages().length}`);
     this.currentModel = modelName;
     console.log(`New context messages count: ${this.getCurrentContext().getMessages().length}`);

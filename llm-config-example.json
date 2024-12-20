@@ -1,0 +1,20 @@
+
+{
+  "default_llm": "gpt",
+  "llms": {
+    "gpt": {
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "temperature": 0.7,
+      "api_key": "${OPENAI_API_KEY}",
+      "systemPrompt": "You are a helpful AI assistant. Respond concisely and clearly."
+    },
+    "claude": {
+      "model": "claude-3-5-haiku-latest",
+      "provider": "anthropic",
+      "temperature": 0.7,
+      "api_key": "${ANTHROPIC_API_KEY}",
+      "systemPrompt": "You are a helpful AI assistant. Respond concisely and clearly."
+    }
+  }
+}

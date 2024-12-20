@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev --respawn --transpile-only src/index.ts config.json"
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts llm-config.json",
+    "start": "ts-node src/index.ts llm-config.json"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +14,6 @@
     "@anthropic-ai/sdk": "^0.33.1",
     "@langchain/anthropic": "^0.3.11",
     "langchain": "^0.3.7",
-    "nodemon": "^3.1.9",
     "openai": "^4.77.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",

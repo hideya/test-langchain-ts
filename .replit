@@ -30,4 +30,4 @@ task = "shell.exec"
 args = "npm run dev"
 
 [deployment]
-run = ["sh", "-c", "npx ts-node src/index.ts config.json"]
+run = ["sh", "-c", "npx ts-node src/index.ts llm-config.json"]
