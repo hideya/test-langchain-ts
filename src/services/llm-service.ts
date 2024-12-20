@@ -8,14 +8,15 @@ export class LLMService {
   private models: Map<string, BaseChatModel> = new Map();
   private contexts: Map<string, ChatContext> = new Map();
   private currentModel: string;
+  private contextConfig: ChatContextConfig;
 
   private constructor(defaultLLM: string, contextConfig?: ChatContextConfig) {
     this.currentModel = defaultLLM;
-    this.initializeContexts(contextConfig);
+    this.contextConfig = contextConfig || {};
   }
 
   static async initialize(
-    llmConfigs: { [key: string]: LLMConfig }, 
+    llmConfigs: { [key: string]: LLMConfig },
     defaultLLM: string,
     contextConfig?: ChatContextConfig
   ): Promise<LLMService> {
@@ -24,10 +25,13 @@ export class LLMService {
     return service;
   }
 
-  private initializeContexts(config?: ChatContextConfig): void {
-    this.contexts.clear();
-    if (config?.systemPrompt) {
-      console.log('Initializing chat contexts with system prompt:', config.systemPrompt);
+  private initializeContexts(): void {
+    // Create a new context for each model using the stored config
+    for (const modelName of this.models.keys()) {
+      this.contexts.set(modelName, new ChatContext(this.contextConfig));
+      if (this.contextConfig?.systemPrompt) {
+        console.log(`Initialized chat context for ${modelName} with system prompt:`, this.contextConfig.systemPrompt);
+      }
     }
   }
 
@@ -68,10 +72,11 @@ export class LLMService {
     const initPromises = Object.entries(configs).map(async ([name, config]) => {
       const model = await this.initializeModel(config);
       this.models.set(name, model);
-      this.contexts.set(name, new ChatContext());
     });
 
     await Promise.all(initPromises);
+    // Initialize contexts after all models are set up
+    this.initializeContexts();
   }
 
   public getCurrentModel(): BaseChatModel {
@@ -94,7 +99,10 @@ export class LLMService {
     if (!this.models.has(modelName)) {
       throw new ConfigurationError(`Model ${modelName} not found in available configurations`);
     }
+    console.log(`Switching from ${this.currentModel} to ${modelName}`);
+    console.log(`Current context messages count: ${this.getCurrentContext().getMessages().length}`);
     this.currentModel = modelName;
+    console.log(`New context messages count: ${this.getCurrentContext().getMessages().length}`);
     console.log(`Switched to model: ${modelName}`);
   }
 
@@ -104,7 +112,10 @@ export class LLMService {
 
   public clearCurrentContext(): void {
     const context = this.getCurrentContext();
+    console.log(`Clearing context for model ${this.currentModel}`);
+    console.log(`Messages before clear: ${context.getMessages().length}`);
     context.clear();
+    console.log(`Messages after clear: ${context.getMessages().length}`);
     console.log(`Cleared chat context for model: ${this.currentModel}`);
   }
 }

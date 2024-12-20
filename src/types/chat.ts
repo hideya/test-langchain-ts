@@ -20,7 +20,7 @@ export class ChatContext {
 
   public addMessage(content: string, type: ChatMessageType): void {
     let message: BaseMessage;
-    
+
     switch (type) {
       case 'human':
         message = new HumanMessage(content);
@@ -34,17 +34,20 @@ export class ChatContext {
     }
 
     this.messages.push(message);
-    
+    console.log(`Added ${type} message. Total messages: ${this.messages.length}`);
+
     // Keep only the last maxMessages (excluding system message)
     const systemMessages = this.messages.filter(m => m instanceof SystemMessage);
     const nonSystemMessages = this.messages.filter(m => !(m instanceof SystemMessage));
-    
+
     if (nonSystemMessages.length > this.maxMessages) {
       const excess = nonSystemMessages.length - this.maxMessages;
+      console.log(`Trimming ${excess} oldest messages to maintain history limit of ${this.maxMessages}`);
       nonSystemMessages.splice(0, excess);
     }
-    
+
     this.messages = [...systemMessages, ...nonSystemMessages];
+    console.log(`Final message count after trim: ${this.messages.length}`);
   }
 
   public getMessages(): BaseMessage[] {
@@ -52,8 +55,11 @@ export class ChatContext {
   }
 
   public clear(): void {
+    console.log(`Clearing context. Current message count: ${this.messages.length}`);
     // Preserve system messages when clearing context
     const systemMessages = this.messages.filter(m => m instanceof SystemMessage);
+    console.log(`Preserving ${systemMessages.length} system messages`);
     this.messages = systemMessages;
+    console.log(`Context cleared. Remaining messages: ${this.messages.length}`);
   }
 }
