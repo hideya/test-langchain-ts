@@ -2,7 +2,7 @@ import { readFile } from 'fs/promises';
 import { createInterface } from 'readline';
 import { HumanMessage } from '@langchain/core/messages';
 import { validateConfig } from './utils/config-validator';
-import { initChatModel } from './services/llm-service';
+import { LLMService } from './services/llm-service';
 import { ConfigurationError } from './types/config';
 
 async function main() {
@@ -25,13 +25,16 @@ async function main() {
 
     const config = validateConfig(JSON.parse(configFile));
 
-    // Initialize chat model
-    console.log('Initializing chat model...');
-    const chatModel = await initChatModel(config.llm);
-    console.log('Chat model initialized successfully');
+    // Initialize LLM service
+    console.log('Initializing LLM service...');
+    const llmService = await LLMService.initialize(config.llms, config.default_llm);
+    console.log('LLM service initialized successfully');
 
-    console.log('\nWelcome to the CLI Chat! Type your message and press Enter.');
-    console.log('Type "quit" or "q" to exit.');
+    console.log('\nWelcome to the CLI Chat! Available commands:');
+    console.log('- Type your message and press Enter to chat');
+    console.log('- Type "/switch <model-name>" to switch between available models');
+    console.log('- Type "/list" to see available models');
+    console.log('- Type "quit" or "q" to exit');
     console.log('─'.repeat(50));
 
     const rl = createInterface({
@@ -57,13 +60,38 @@ async function main() {
       }
 
       try {
-        console.log('\nProcessing...');
-        const response = await chatModel.generate([[new HumanMessage(trimmedInput)]]);
+        if (trimmedInput.startsWith('/')) {
+          const [command, ...args] = trimmedInput.slice(1).split(' ');
 
-        if (response.generations[0]?.[0]?.text) {
-          console.log('\nAI:', response.generations[0][0].text.trim());
+          switch (command.toLowerCase()) {
+            case 'list':
+              const models = llmService.listAvailableModels();
+              console.log('\nAvailable models:');
+              models.forEach(model => console.log(`- ${model}`));
+              break;
+
+            case 'switch':
+              if (args.length === 0) {
+                console.log('\nPlease specify a model name');
+                break;
+              }
+              llmService.switchModel(args[0]);
+              console.log(`\nSwitched to model: ${args[0]}`);
+              break;
+
+            default:
+              console.log('\nUnknown command. Available commands: /list, /switch <model-name>');
+          }
         } else {
-          console.log('\nAI: Sorry, I could not generate a response.');
+          console.log('\nProcessing...');
+          const chatModel = llmService.getCurrentModel();
+          const response = await chatModel.generate([[new HumanMessage(trimmedInput)]]);
+
+          if (response.generations[0]?.[0]?.text) {
+            console.log('\nAI:', response.generations[0][0].text.trim());
+          } else {
+            console.log('\nAI: Sorry, I could not generate a response.');
+          }
         }
       } catch (error) {
         console.error('\nError:', (error as Error).message);
@@ -83,12 +111,6 @@ async function main() {
     process.exit(1);
   }
 }
-
-// Handle process termination - This is removed because rl.on('close') handles this now.
-//process.on('SIGINT', () => {
-//  console.log('\nChat session ended. Goodbye!');
-//  process.exit(0);
-//});
 
 main().catch((error) => {
   console.error('Fatal Error:', error);

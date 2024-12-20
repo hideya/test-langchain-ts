@@ -6,7 +6,10 @@ export interface LLMConfig {
 }
 
 export interface AppConfig {
-  llm: LLMConfig;
+  default_llm: string;
+  llms: {
+    [key: string]: LLMConfig;
+  };
 }
 
 export class ConfigurationError extends Error {
