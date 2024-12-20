@@ -14,8 +14,10 @@
     "@anthropic-ai/sdk": "^0.33.1",
     "@langchain/anthropic": "^0.3.11",
     "langchain": "^0.3.7",
+    "nodemon": "^3.1.9",
     "openai": "^4.77.0",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
   }
 }
