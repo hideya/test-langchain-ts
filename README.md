@@ -20,7 +20,7 @@ npm install
 
 2. Configure the application:
 - Copy `llm-config-example.json` to `llm-config.json`
-- Update the API key and other settings in `llm-config.json`
+- Update the API keys and other settings in `llm-config.json`
 
 ## Usage
 

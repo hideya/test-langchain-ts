@@ -5,9 +5,9 @@ import { LLMConfig, ConfigurationError } from '../types/config';
 import { ChatContext, ChatContextConfig } from '../types/chat';
 
 export class LLMService {
+  public currentModel: string;
   private models: Map<string, BaseChatModel> = new Map();
   private contexts: Map<string, ChatContext> = new Map();
-  private currentModel: string;
   private contextConfig: ChatContextConfig;
 
   private constructor(defaultLLM: string, contextConfig?: ChatContextConfig) {
@@ -108,9 +108,7 @@ export class LLMService {
   }
 
   public listAvailableModels(): string[] {
-    return Array.from(this.models.keys()).map(model => 
-      model === this.currentModel ? `*${model}` : `-${model}`
-    );
+    return Array.from(this.models.keys());
   }
 
   public clearCurrentContext(): void {

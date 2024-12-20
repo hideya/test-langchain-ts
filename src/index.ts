@@ -68,11 +68,15 @@ async function main() {
         if (trimmedInput.startsWith('/')) {
           const [command, ...args] = trimmedInput.slice(1).split(' ');
 
+          process.stdout.write(colors.yellow);
           switch (command.toLowerCase()) {
             case 'list':
               const models = llmService.listAvailableModels();
               console.log('\nAvailable models:');
-              models.forEach(model => console.log(`- ${model}`));
+              models.forEach((model) => {
+                const prefix = model === llmService.currentModel ? '*' : '-';
+                console.log(`${prefix} ${model}`);
+              });
               break;
 
             case 'switch':
@@ -131,12 +135,12 @@ async function main() {
         console.error('\nError:', (error as Error).message);
       }
 
-      console.log('\n');
+      console.log(colors.reset);
       rl.prompt();
     });
 
     rl.on('close', () => {
-      console.log('\nChat session ended. Goodbye!');
+      console.log('\nChat session ended.\n');
       process.exit(0);
     });
 
