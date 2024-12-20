@@ -54,6 +54,14 @@ export class ChatContext {
     return this.messages;
   }
 
+  public getFormattedHistory(): string[] {
+    return this.messages.map(message => {
+      const role = message instanceof SystemMessage ? 'System' :
+                   message instanceof HumanMessage ? 'You' : 'AI';
+      return `${role}: ${message.content}`;
+    });
+  }
+
   public clear(): void {
     console.log(`Clearing context. Current message count: ${this.messages.length}`);
     // Preserve system messages when clearing context

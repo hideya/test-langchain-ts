@@ -36,6 +36,7 @@ async function main() {
     console.log('- Type your message and press Enter to chat');
     console.log('- Type "/switch <model-name>" to switch between available models');
     console.log('- Type "/list" to see available models');
+    console.log('- Type "/history" to view chat history');
     console.log('- Type "/clear" to clear the current conversation context');
     console.log('- Type "quit" or "q" to exit');
     console.log('─'.repeat(50));
@@ -87,8 +88,14 @@ async function main() {
               console.log('\nConversation context cleared');
               break;
 
+            case 'history':
+              const history = llmService.getCurrentContext().getFormattedHistory();
+              console.log('\nChat History:');
+              history.forEach((msg, i) => console.log(`${i + 1}. ${msg}`));
+              break;
+
             default:
-              console.log('\nUnknown command. Available commands: /list, /switch <model-name>, /clear');
+              console.log('\nUnknown command. Available commands: /list, /switch <model-name>, /history, /clear');
           }
         } else {
           console.log('\nProcessing...');
