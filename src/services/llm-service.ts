@@ -1,11 +1,12 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { ChatAnthropic } from '@langchain/anthropic';
+import { ChatGroq } from '@langchain/groq';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { LLMConfig, ConfigurationError } from '../types/config';
 import { ChatContext, ChatContextConfig } from '../types/chat';
 
 export class LLMService {
-  public currentModel: string;
+  private currentModel: string;
   private models: Map<string, BaseChatModel> = new Map();
   private contexts: Map<string, ChatContext> = new Map();
   private contextConfig: ChatContextConfig;
@@ -18,7 +19,7 @@ export class LLMService {
   static async initialize(
     llmConfigs: { [key: string]: LLMConfig },
     defaultLLM: string,
-    contextConfig?: ChatContextConfig
+    contextConfig?: ChatContextConfig,
   ): Promise<LLMService> {
     const service = new LLMService(defaultLLM, contextConfig);
     await service.initializeModels(llmConfigs);
@@ -29,10 +30,13 @@ export class LLMService {
     for (const [modelName, config] of Object.entries(configs)) {
       const contextConfig = {
         ...this.contextConfig,
-        systemPrompt: config.systemPrompt || this.contextConfig.systemPrompt
+        systemPrompt: config.systemPrompt || this.contextConfig.systemPrompt,
       };
       this.contexts.set(modelName, new ChatContext(contextConfig));
-      console.log(`Initialized chat context for ${modelName} with system prompt:`, contextConfig.systemPrompt);
+      console.log(
+        `Initialized chat context for ${modelName} with system prompt:`,
+        contextConfig.systemPrompt,
+      );
     }
   }
 
@@ -57,19 +61,35 @@ export class LLMService {
             anthropicApiKey: config.api_key,
           });
 
+        case 'groq':
+          console.log(`Using Groq model: ${config.model}`);
+          // Groq library requires the API key set by the env variable
+          process.env.GROQ_API_KEY = config.api_key;
+          return new ChatGroq({
+            modelName: config.model,
+            temperature: config.temperature,
+            // groqApiKey: config.api_key,
+          });
+
         default:
-          throw new ConfigurationError(`Unsupported provider: ${config.provider}`);
+          throw new ConfigurationError(
+            `Unsupported provider: ${config.provider}`,
+          );
       }
     } catch (error) {
       console.error('Error initializing chat model:', (error as Error).message);
       if (error instanceof ConfigurationError) {
         throw error;
       }
-      throw new ConfigurationError(`Failed to initialize chat model: ${(error as Error).message}`);
+      throw new ConfigurationError(
+        `Failed to initialize chat model: ${(error as Error).message}`,
+      );
     }
   }
 
-  private async initializeModels(configs: { [key: string]: LLMConfig }): Promise<void> {
+  private async initializeModels(configs: {
+    [key: string]: LLMConfig;
+  }): Promise<void> {
     const initPromises = Object.entries(configs).map(async ([name, config]) => {
       const model = await this.initializeModel(config);
       this.models.set(name, model);
@@ -83,28 +103,42 @@ export class LLMService {
   public getCurrentModel(): BaseChatModel {
     const model = this.models.get(this.currentModel);
     if (!model) {
-      throw new ConfigurationError(`Current model ${this.currentModel} not initialized`);
+      throw new ConfigurationError(
+        `Current model ${this.currentModel} not initialized`,
+      );
     }
     return model;
+  }
+
+  public getCurrentModelName(): string {
+    return this.currentModel;
   }
 
   public getCurrentContext(): ChatContext {
     const context = this.contexts.get(this.currentModel);
     if (!context) {
-      throw new ConfigurationError(`Context for model ${this.currentModel} not initialized`);
+      throw new ConfigurationError(
+        `Context for model ${this.currentModel} not initialized`,
+      );
     }
     return context;
   }
 
   public switchModel(modelName: string): void {
     if (!this.models.has(modelName)) {
-      throw new ConfigurationError(`Model ${modelName} not found in available configurations`);
+      throw new ConfigurationError(
+        `Model ${modelName} not found in available configurations`,
+      );
     }
-    console.log(`\nSwitching from ${this.currentModel} to ${modelName}`);
-    console.log(`Current context messages count: ${this.getCurrentContext().getMessages().length}`);
+    // console.log(`\nSwitching from ${this.currentModel} to ${modelName}`);
+    // console.log(
+    //   `Current context messages count: ${this.getCurrentContext().getMessages().length}`,
+    // );
     this.currentModel = modelName;
-    console.log(`New context messages count: ${this.getCurrentContext().getMessages().length}`);
-    console.log(`Switched to model: ${modelName}`);
+    // console.log(
+    //   `New context messages count: ${this.getCurrentContext().getMessages().length}`,
+    // );
+    // console.log(`Switched to model: ${modelName}`);
   }
 
   public listAvailableModels(): string[] {

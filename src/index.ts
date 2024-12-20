@@ -74,8 +74,8 @@ async function main() {
               const models = llmService.listAvailableModels();
               console.log('\nAvailable models:');
               models.forEach((model) => {
-                const prefix = model === llmService.currentModel ? '*' : '-';
-                console.log(`${prefix} ${model}`);
+                const postfix = model === llmService.getCurrentModelName() ? '(current)' : '';
+                console.log(`- ${model} ${postfix}`);
               });
               break;
 

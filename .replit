@@ -17,7 +17,7 @@ args = "CLI Chat App"
 
 [[workflows.workflow]]
 name = "CLI Chat App"
-author = "agent"
+author = "agent" 
 
 [workflows.workflow.metadata]
 agentRequireRestartOnSave = false
