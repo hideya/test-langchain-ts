@@ -27,7 +27,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npx ts-node src/index.ts config.json"
+args = "npm run dev"
 
 [deployment]
 run = ["sh", "-c", "npx ts-node src/index.ts config.json"]
