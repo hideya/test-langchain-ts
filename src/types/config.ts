@@ -3,6 +3,7 @@ export interface LLMConfig {
   provider: string;
   temperature: number;
   api_key: string;
+  systemPrompt?: string;
 }
 
 export interface AppConfig {

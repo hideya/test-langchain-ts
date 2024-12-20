@@ -25,13 +25,14 @@ export class LLMService {
     return service;
   }
 
-  private initializeContexts(): void {
-    // Create a new context for each model using the stored config
-    for (const modelName of this.models.keys()) {
-      this.contexts.set(modelName, new ChatContext(this.contextConfig));
-      if (this.contextConfig?.systemPrompt) {
-        console.log(`Initialized chat context for ${modelName} with system prompt:`, this.contextConfig.systemPrompt);
-      }
+  private initializeContexts(configs: { [key: string]: LLMConfig }): void {
+    for (const [modelName, config] of Object.entries(configs)) {
+      const contextConfig = {
+        ...this.contextConfig,
+        systemPrompt: config.systemPrompt || this.contextConfig.systemPrompt
+      };
+      this.contexts.set(modelName, new ChatContext(contextConfig));
+      console.log(`Initialized chat context for ${modelName} with system prompt:`, contextConfig.systemPrompt);
     }
   }
 
@@ -76,7 +77,7 @@ export class LLMService {
 
     await Promise.all(initPromises);
     // Initialize contexts after all models are set up
-    this.initializeContexts();
+    this.initializeContexts(configs);
   }
 
   public getCurrentModel(): BaseChatModel {
