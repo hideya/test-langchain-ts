@@ -14,7 +14,9 @@
     "@langchain/anthropic": "^0.3.11",
     "@langchain/groq": "^0.1.2",
     "@langchain/openai": "^0.3.16",
-    "langchain": "^0.3.7",
+    "langchain": "^0.3.7"
+  },
+  "devDependencies": {
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.2"
