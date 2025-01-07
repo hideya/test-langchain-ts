@@ -1,4 +1,3 @@
-
 # CLI Chat Application
 
 A command-line interface chat application that supports multiple LLM providers (OpenAI, Anthropic and Groq) with configurable system prompts and chat history.
@@ -35,3 +34,7 @@ npm start
 - `/history` - View chat history
 - `/clear` - Clear conversation context
 - `quit` or `q` - Exit application
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE file](LICENSE) for details.
